@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { OrderFilter } from "./OrderFilter";
 import { OrderList } from "./OrderList";
 import { OrderDetail } from "./OrderDetail";
-import Pagination from "../_components/Pagination/Pagination";
-import { usePagination } from "../_store/usePagination";
+import { usePagination } from "@/app/_store/usePagination";
+import Pagination from "@/app/_components/Pagination/Pagination";
 
 export default function OrderPage() {
   const [orders, setOrders] = useState<any[]>([]);
