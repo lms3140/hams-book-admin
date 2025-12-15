@@ -1,6 +1,8 @@
 "use client";
 
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
+import Swal from "sweetalert2";
 
 type LoginFormData = {
   userId: string;
@@ -20,7 +22,13 @@ export default function LoginForm() {
       credentials: "include",
     });
     const data = await resp.json();
-    console.log(data);
+    Swal.fire({
+      title: "로그인 성공",
+      icon: "success",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+    redirect("/book");
   };
 
   return (
