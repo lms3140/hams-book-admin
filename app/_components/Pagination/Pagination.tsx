@@ -14,8 +14,8 @@ export default function Pagination({
   currentPage,
   onPageChange,
 }: PaginationProps) {
-  const prevPage = currentPage === 0 ? "" : <IoIosArrowBack />;
-  const nextPage = currentPage === pageCount - 1 ? "" : <IoIosArrowForward />;
+  const prevPage = currentPage === 0 ? null : <IoIosArrowBack />;
+  const nextPage = currentPage === pageCount - 1 ? null : <IoIosArrowForward />;
 
   return (
     <ReactPaginate
@@ -30,7 +30,7 @@ export default function Pagination({
       activeLinkClassName="bg-gray-600 text-white font-semibold"
       previousLinkClassName="flex justify-center items-center w-7 h-7 border border-gray-400 rounded-full text-gray-600 hover:bg-gray-200"
       nextLinkClassName="flex justify-center items-center w-7 h-7 border border-gray-400 rounded-full text-gray-600 hover:bg-gray-200"
-      disabledClassName="opacity-30 pointer-events-none"
+      disabledClassName="hidden"
     />
   );
 }
