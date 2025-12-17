@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Header } from "./Layout/Header";
 import { Menu } from "./Layout/Menu";
 
@@ -10,7 +11,9 @@ export default function DefaultLayout({
     <div className="flex ">
       <div className="border-r border-gray-200 w-2xs min-w-2xs">
         <div className="h-20 border-b border-gray-200 flex justify-center">
-          <img src="/images/logo.png" alt="logo" className="h-full" />
+          <Link href={"/"}>
+            <img src="/images/logo.png" alt="logo" className="h-full" />
+          </Link>
         </div>
         <div>
           <Menu />

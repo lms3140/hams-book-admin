@@ -12,3 +12,8 @@ export type RespPublisher = {
   publisherId: string;
   name: string;
 };
+
+export type RespAuthor = {
+  authorId: string;
+  name: string;
+};

@@ -7,6 +7,7 @@ export type Book = {
   point: string;
   publishedDate: Date;
   description: string;
+  author: string;
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
@@ -22,4 +23,5 @@ export type RequestBookInfo = {
   publishedDate: string;
   description: string;
   imageUrl: string;
+  authorId: string;
 };
