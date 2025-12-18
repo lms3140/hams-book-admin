@@ -18,3 +18,21 @@
     --foreground: #ededed;
   }
 }
+
+@layer utilities {
+  .form-input {
+    @apply mb-2 rounded-md p-1 focus:outline-none border border-slate-300;
+  }
+
+  .form-text {
+    @apply text-slate-900;
+  }
+
+  .form-bg {
+    @apply bg-slate-100;
+  }
+
+  .form-label {
+    @apply font-bold;
+  }
+}
