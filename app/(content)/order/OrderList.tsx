@@ -20,6 +20,8 @@ export function OrderList({
         return "취소";
       case "FAIL":
         return "결제실패";
+      case "DELIVER":
+        return "배송중";
       default:
         return status;
     }
