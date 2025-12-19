@@ -1,30 +1,36 @@
 "use client";
 
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+
+type OrderStatus = "READY" | "PAID" | "FAIL" | "CANCEL" | "ERROR";
 
 export default function OrderDetail() {
   const router = useRouter();
   const { orderId } = useParams();
   const [order, setOrder] = useState<any>(null);
+  const [status, setStatus] = useState<OrderStatus>();
 
   useEffect(() => {
     const fetchOrderDetail = async () => {
-      const res = await fetch(`http://localhost:8080/admin/orders/${orderId}`, {
+      const res = await fetch(`${SERVER_URL}/admin/orders/${orderId}`, {
         method: "GET",
         credentials: "include",
       });
 
       const data = await res.json();
       setOrder(data);
+      setStatus(data.orderStatus);
     };
 
     fetchOrderDetail();
   }, [orderId]);
 
-  if (!order) {
+  if (!order || !status) {
     return <div>주문 정보를 불러오는 중입니다...</div>;
   }
 
@@ -44,9 +50,37 @@ export default function OrderDetail() {
         return "취소";
       case "FAIL":
         return "결제실패";
+      case "ERROR":
+        return "결제오류";
+      case "DELIVER":
+        return "배송중";
       default:
         return status;
     }
+  };
+
+  const handleStatusChange = async () => {
+    await fetch(`${SERVER_URL}/admin/orders/${orderId}/status`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        orderStatus: status,
+      }),
+    });
+
+    setOrder((prev: any) => ({
+      ...prev,
+      orderStatus: status,
+    }));
+
+    Swal.fire({
+      title: "상태가 변경되었습니다.",
+      icon: "success",
+    });
+    router.refresh();
   };
 
   const totalPrice = order.items.reduce(
@@ -63,10 +97,27 @@ export default function OrderDetail() {
       <div className="flex gap-[20px] pb-[30px]">
         <h3 className="font-bold">주문상태</h3>
         <p>{formatStatus(order.orderStatus)}</p>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value as OrderStatus)}
+          className="border rounded-md px-3 py-2 text-sm "
+        >
+          <option value="READY">결제대기</option>
+          <option value="PAID">배송준비중</option>
+          <option value="DELIVER">배송중</option>
+          <option value="CANCEL">취소</option>
+          <option value="FAIL">결제실패</option>
+        </select>
+        <button
+          className="px-4 py-2 rounded-md bg-black text-white text-sm hover:bg-gray-800"
+          onClick={handleStatusChange}
+        >
+          변경
+        </button>
       </div>
 
       <div className="pb-[50px]">
-        <h3 className="text-2xl">주문 상품 정보</h3>
+        <h3 className="text-2xl border-b pb-[10px]">주문 상품 정보</h3>
         <div className="flex content-center pr-10 pl-10 gap-9 justify-between border-b pb-[10px] pt-[10px]">
           <div className="text-center w-[30px]">no</div>
           <div className="text-center w-[300px]">제목</div>
