@@ -19,7 +19,7 @@ export default function OrderPage() {
       credentials: "include",
     });
     const data = await res.json();
-    // console.log("data :: ", data);
+    console.log("data :: ", data);
     setOrders(data);
     setFilteredOrders(data);
   };
@@ -49,10 +49,12 @@ export default function OrderPage() {
     }
 
     if (filter.keyword.trim()) {
+      const keyword = filter.keyword.trim();
       filtered = filtered.filter(
         (o) =>
           o.address.recipientName?.toString().includes(filter.keyword) ||
-          String(o.orderId).includes(filter.keyword)
+          String(o.orderId).includes(filter.keyword) ||
+          o.items.some((item: any) => item.title.includes(keyword))
       );
     }
     setFilteredOrders(filtered);

@@ -69,6 +69,12 @@ export function OrderFilter({ onSearch }: OrderFilterProps) {
       >
         검색
       </button>
+      <button
+        className="h-10 px-6 bg-black text-white text-sm rounded-md hover:bg-gray-800"
+        onClick={() => window.location.reload()}
+      >
+        초기화
+      </button>
     </div>
   );
 }

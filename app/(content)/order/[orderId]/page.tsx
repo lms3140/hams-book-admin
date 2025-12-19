@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-type OrderStatus = "READY" | "PAID" | "FAIL" | "CANCEL" | "ERROR";
+type OrderStatus = "READY" | "PAID" | "FAIL" | "CANCEL" | "ERROR" | "DELIVER";
 
 export default function OrderDetail() {
   const router = useRouter();

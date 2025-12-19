@@ -37,7 +37,7 @@ export function OrderList({
           <div className="text-center w-[86px]">주문일자</div>
           <div className="text-center w-[42px]">주문자</div>
           <div className="text-center w-[200px]">상품</div>
-          <div className="text-center w-[82px]">가격</div>
+          <div className="text-center w-[85px]">가격</div>
           <div className="text-center w-[50px]">상세</div>
         </div>
 
@@ -75,7 +75,7 @@ export function OrderList({
                     </span>
                   )}
                 </div>
-                <div className="text-center w-[82px]">
+                <div className="text-center w-[85px]">
                   총 {totalPrice.toLocaleString()}원
                 </div>
                 <button
