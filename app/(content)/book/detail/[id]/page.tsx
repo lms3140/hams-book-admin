@@ -10,10 +10,6 @@ export default async function Page({
   const bookInfo = await getServerFetch(
     `http://localhost:8080/book/detail/${id}`
   );
-
-  return (
-    <div>
-      <div></div>
-    </div>
-  );
+  console.log(bookInfo);
+  return <div></div>;
 }

@@ -1,96 +1,100 @@
 "use client";
 
-import { Book, RequestBookInfo } from "@/app/_types/book";
+import { SelectOpt, RequestBookInfo } from "@/app/_types/book";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import {
   getAuthor,
   getCategory,
   getPublisher,
   getSubCategory,
 } from "../create-book/_api/getSelectOpt";
-import { postClientFetch } from "@/app/_lib/api/client/fetch";
-import { SERVER_URL } from "@/app/_lib/api/common/config";
-import Swal from "sweetalert2";
 import { BookInput } from "../create-book/_components/BookInput";
-import Select from "../create-book/_components/Select";
-import DatePicker from "react-datepicker";
-import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
-
-type Category = {
-  value: string;
-  id: string;
-};
-
+import { CheckBox } from "../create-book/_components/CheckBox";
+import Select from "react-select/base";
+import dynamic from "next/dynamic";
+const BookSelect = dynamic(
+  () => import("../create-book/_components/BookSelect"),
+  {
+    ssr: false,
+  }
+);
 // BookForm 재사용성 높이기 위한 작업
 type BookFormProps = {
-  defaultValues: Partial<RequestBookInfo>;
-  selectOptions: {
-    category: Category[];
-    subCategory: Category[];
-    publisher: Category[];
-    author: Category[];
-  };
-  submitHandler: (data: Book) => void;
+  submitHandler: SubmitHandler<RequestBookInfo>;
+  updateData?: RequestBookInfo;
+  formType: "create" | "update";
 };
 
-export function BookForm() {
-  const { register, watch, setValue, handleSubmit, control } =
-    useForm<RequestBookInfo>({ defaultValues: { publishedDate: "" } });
-  const router = useRouter();
+export function BookForm({
+  submitHandler,
+  formType,
+  updateData,
+}: BookFormProps) {
+  const { register, handleSubmit, control, watch, reset } =
+    useForm<RequestBookInfo>({});
 
-  const [category, setCategory] = useState<Category[]>([]);
-  const [subCategory, setSubCategory] = useState<Category[]>([]);
-  const [publisher, setPublisher] = useState<Category[]>([]);
-  const [author, setAuthor] = useState<Category[]>([]);
+  const [category, setCategory] = useState<SelectOpt[]>([]);
+  const [subCategory, setSubCategory] = useState<SelectOpt[]>([]);
+  const [publisher, setPublisher] = useState<SelectOpt[]>([]);
+  const [author, setAuthor] = useState<SelectOpt[]>([]);
 
+  const [isLoading, setIsLoading] = useState(false);
   const watchCategory = watch("categoryId");
 
+  // init form
   useEffect(() => {
+    setIsLoading(true);
     (async () => {
       const categories = await getCategory();
       const publishers = await getPublisher();
       const authors = await getAuthor();
-      setValue("categoryId", categories[0]?.id);
-      setCategory(categories);
-      setValue("publisherId", publishers[0]?.id);
-      setPublisher(publishers);
-      setValue("authorId", authors[0]?.id);
-      setAuthor(authors);
+      const subCategories = await getSubCategory(categories[0]);
+
+      if (
+        categories.length > 0 &&
+        publishers.length > 0 &&
+        authors.length > 0 &&
+        subCategories.length > 0
+      ) {
+        setCategory(categories);
+        setPublisher(publishers);
+        setAuthor(authors);
+        setSubCategory(subCategories);
+
+        if (!updateData) {
+          // 선택하세요를 넣으면 필요없는 부분
+          const categoryId = categories[0];
+          const subCategoryId = subCategories[0];
+          const publisherId = publishers[0];
+          reset({ categoryId, publisherId, subCategoryId });
+        } else {
+          reset(updateData);
+        }
+        setIsLoading(false);
+      }
     })();
   }, []);
 
+  // 서브카테고리 감시
   useEffect(() => {
     (async () => {
       const subCategories = await getSubCategory(watchCategory);
       if (!subCategories) {
         return;
       }
-      setValue("subCategoryId", subCategories[0]?.id);
       setSubCategory(subCategories);
     })();
   }, [watchCategory]);
-
-  const createBook = async (data: RequestBookInfo) => {
-    try {
-      const { resp } = await postClientFetch(`${SERVER_URL}/book/create`, data);
-      console.log(resp.status);
-      if (resp.status === 201) {
-        Swal.fire({ title: "등록성공", icon: "success", timer: 1000 });
-        router.replace("/book");
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
   const formBox = `grid mb-2 bg-white rounded-xl p-8 shadow-sm`;
 
   return (
     <div className="p-20 h-auto text">
       <form
-        onSubmit={handleSubmit(createBook)}
+        onSubmit={handleSubmit(submitHandler)}
         className="flex  flex-col form-bg ms-auto me-auto w-3xl rounded-2xl p-5"
       >
         <div className={`flex flex-col mb-2 bg-white rounded-xl p-8 shadow-sm`}>
@@ -101,34 +105,61 @@ export function BookForm() {
             required
           />
         </div>
-        <div className="grid grid-cols-[1fr_2fr] gap-2">
+        <div className="grid gap-2">
           <div className={`${formBox}`}>
-            <Select
-              title="카테고리"
-              register={register}
-              label="categoryId"
-              list={category}
+            <Controller
+              name="categoryId"
+              control={control}
+              render={({ field }) => (
+                <BookSelect
+                  multi={false}
+                  field={field}
+                  options={category}
+                  title="카테고리"
+                />
+              )}
             />
-            <Select
-              title="서브카테고리"
-              register={register}
-              label="subCategoryId"
-              list={subCategory}
+
+            <Controller
+              name="subCategoryId"
+              control={control}
+              render={({ field }) => (
+                <BookSelect
+                  multi={false}
+                  field={field}
+                  options={subCategory}
+                  title="서브카테고리"
+                />
+              )}
             />
           </div>
           <div className={`${formBox}`}>
-            <Select
-              title="출판사"
-              register={register}
-              label="publisherId"
-              list={publisher}
-            />
-
-            <Select
-              title="작가"
-              register={register}
-              label="authorId"
-              list={author}
+            {/* <Controller
+              name="subCategoryId"
+              control={control}
+              render={({ field }) => (
+                <BookSelect
+                  multi={false}
+                  field={field}
+                  options={subCategory}
+                  title="서브카테고리"
+                />
+              )}
+            /> */}
+          </div>
+          <div className={`${formBox}`}>
+            <h3 className="font-bold mb-2.5">작가</h3>
+            <Controller
+              name="authorId"
+              control={control}
+              render={({ field }) => (
+                <BookSelect
+                  multi={true}
+                  field={field}
+                  options={author}
+                  title="서브카테고리"
+                />
+              )}
             />
           </div>
         </div>
@@ -185,7 +216,7 @@ export function BookForm() {
           className="bg-blue-500 rounded-2xl p-4 text-slate-100 font-bold text-xl"
           type="submit"
         >
-          등록
+          {formType === "create" ? "등록" : "수정"}
         </button>
       </form>
     </div>

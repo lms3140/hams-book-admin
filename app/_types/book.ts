@@ -16,13 +16,18 @@ export type Book = {
 
 export type RequestBookInfo = {
   title: string;
-  categoryId: string;
-  subCategoryId: string;
-  publisherId: string;
+  categoryId: SelectOpt;
+  subCategoryId: SelectOpt;
+  publisherId: SelectOpt;
   price: string;
   point: string;
   publishedDate: string;
   description: string;
   imageUrl: string;
-  authorId: string;
+  authorId: SelectOpt[];
+};
+
+export type SelectOpt = {
+  value: string;
+  label: string;
 };
