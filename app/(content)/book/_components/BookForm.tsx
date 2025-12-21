@@ -1,6 +1,10 @@
 "use client";
 
-import { SelectOpt, RequestBookInfo } from "@/app/_types/book";
+import {
+  SelectOpt,
+  RequestBookInfo,
+  RespBookUpdateData,
+} from "@/app/_types/book";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -14,7 +18,12 @@ import {
 import { BookInput } from "../create-book/_components/BookInput";
 import { CheckBox } from "../create-book/_components/CheckBox";
 import Select from "react-select/base";
+// import BookSelect from "../create-book/_components/BookSelect";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { postClientFetch } from "@/app/_lib/api/client/fetch";
+import Swal from "sweetalert2";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 const BookSelect = dynamic(
   () => import("../create-book/_components/BookSelect"),
   {
@@ -23,16 +32,11 @@ const BookSelect = dynamic(
 );
 // BookForm 재사용성 높이기 위한 작업
 type BookFormProps = {
-  submitHandler: SubmitHandler<RequestBookInfo>;
-  updateData?: RequestBookInfo;
+  updateData?: RespBookUpdateData;
   formType: "create" | "update";
 };
 
-export function BookForm({
-  submitHandler,
-  formType,
-  updateData,
-}: BookFormProps) {
+export function BookForm({ formType, updateData }: BookFormProps) {
   const { register, handleSubmit, control, watch, reset } =
     useForm<RequestBookInfo>({});
 
@@ -42,7 +46,7 @@ export function BookForm({
   const [author, setAuthor] = useState<SelectOpt[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const watchCategory = watch("categoryId");
+  const watchCategory = watch("category");
 
   // init form
   useEffect(() => {
@@ -65,13 +69,33 @@ export function BookForm({
         setSubCategory(subCategories);
 
         if (!updateData) {
-          // 선택하세요를 넣으면 필요없는 부분
-          const categoryId = categories[0];
-          const subCategoryId = subCategories[0];
-          const publisherId = publishers[0];
-          reset({ categoryId, publisherId, subCategoryId });
+          const category = categories[0];
+          const subCategory = subCategories[0];
+          const publisher = publishers[0];
+          reset({ category, publisher, subCategory });
         } else {
-          reset(updateData);
+          const category = categories.find(
+            (v) => v.value === updateData.category
+          );
+          const author = updateData.author.map((value) =>
+            authors.find((opt) => opt.value === value)
+          );
+          const subCategory = subCategories.find(
+            (v) => v.value === updateData.subCategory
+          );
+          const publisher = publishers.find(
+            (v) => v.value === updateData.publisher
+          );
+          const bookId = updateData.bookId;
+
+          reset({
+            ...updateData,
+            bookId,
+            author,
+            category,
+            subCategory,
+            publisher,
+          });
         }
         setIsLoading(false);
       }
@@ -89,12 +113,27 @@ export function BookForm({
     })();
   }, [watchCategory]);
 
+  const router = useRouter();
+  const saveBook = async (data: RequestBookInfo) => {
+    console.log(data);
+    try {
+      const { resp } = await postClientFetch(`${SERVER_URL}/book/save`, data);
+      console.log(resp.status);
+      if (resp.status === 201) {
+        Swal.fire({ title: "등록성공", icon: "success", timer: 1000 });
+        router.replace("/book");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const formBox = `grid mb-2 bg-white rounded-xl p-8 shadow-sm`;
 
   return (
     <div className="p-20 h-auto text">
       <form
-        onSubmit={handleSubmit(submitHandler)}
+        onSubmit={handleSubmit(saveBook)}
         className="flex  flex-col form-bg ms-auto me-auto w-3xl rounded-2xl p-5"
       >
         <div className={`flex flex-col mb-2 bg-white rounded-xl p-8 shadow-sm`}>
@@ -108,11 +147,11 @@ export function BookForm({
         <div className="grid gap-2">
           <div className={`${formBox}`}>
             <Controller
-              name="categoryId"
+              name="category"
               control={control}
               render={({ field }) => (
                 <BookSelect
-                  multi={false}
+                  isMulti={false}
                   field={field}
                   options={category}
                   title="카테고리"
@@ -121,11 +160,11 @@ export function BookForm({
             />
 
             <Controller
-              name="subCategoryId"
+              name="subCategory"
               control={control}
               render={({ field }) => (
                 <BookSelect
-                  multi={false}
+                  isMulti={false}
                   field={field}
                   options={subCategory}
                   title="서브카테고리"
@@ -134,30 +173,29 @@ export function BookForm({
             />
           </div>
           <div className={`${formBox}`}>
-            {/* <Controller
-              name="subCategoryId"
+            <Controller
+              name="publisher"
               control={control}
               render={({ field }) => (
                 <BookSelect
-                  multi={false}
+                  isMulti={false}
                   field={field}
-                  options={subCategory}
-                  title="서브카테고리"
+                  options={publisher}
+                  title="출판사"
                 />
               )}
-            /> */}
+            />
           </div>
           <div className={`${formBox}`}>
-            <h3 className="font-bold mb-2.5">작가</h3>
             <Controller
-              name="authorId"
+              name="author"
               control={control}
               render={({ field }) => (
                 <BookSelect
-                  multi={true}
+                  isMulti={true}
                   field={field}
                   options={author}
-                  title="서브카테고리"
+                  title="작가"
                 />
               )}
             />

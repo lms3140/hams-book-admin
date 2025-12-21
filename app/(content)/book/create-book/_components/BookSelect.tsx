@@ -4,25 +4,26 @@ import { ControllerRenderProps } from "react-hook-form";
 import Select from "react-select";
 import { GroupBase, OptionsOrGroups } from "react-select";
 
-type SelectProps<IsMulti extends boolean> = {
+type SelectProps<T extends boolean> = {
   options: OptionsOrGroups<SelectOpt, GroupBase<SelectOpt>>;
   title: string;
   field: ControllerRenderProps<RequestBookInfo, any>;
-  multi: IsMulti;
+  isMulti: T;
 };
 
-export default function BookSelect<IsMulti extends boolean>({
+export default function BookSelect<T extends boolean>({
   title,
   options,
   field,
-}: SelectProps<IsMulti>) {
+  isMulti,
+}: SelectProps<T>) {
   const [inputValue, setInputValue] = useState("");
 
   return (
     <>
       <label className="form-label mb-1">{title}</label>
 
-      <Select<SelectOpt, IsMulti>
+      <Select<SelectOpt, T>
         options={options}
         value={field.value as SelectOpt | null}
         onChange={(option) => {
@@ -35,7 +36,9 @@ export default function BookSelect<IsMulti extends boolean>({
           }
         }}
         onMenuClose={() => setInputValue("")}
+        isMulti={isMulti}
         isClearable
+        getOptionValue={(option) => `${option["value"]}`}
       />
     </>
   );

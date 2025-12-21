@@ -1,5 +1,6 @@
-import { SERVER_URL } from "@/app/_lib/api/common/config";
 import { getServerFetch } from "@/app/_lib/api/server/fetch";
+import { BookForm } from "../../_components/BookForm";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 
 export default async function Page({
   params,
@@ -8,8 +9,11 @@ export default async function Page({
 }) {
   const id = (await params).id;
   const bookInfo = await getServerFetch(
-    `http://localhost:8080/book/detail/${id}`
+    `${SERVER_URL}/book/admin/detail/${id}`
   );
-  console.log(bookInfo);
-  return <div></div>;
+  return (
+    <div>
+      <BookForm formType="update" updateData={{ ...bookInfo, bookId: id }} />
+    </div>
+  );
 }

@@ -15,16 +15,31 @@ export type Book = {
 };
 
 export type RequestBookInfo = {
+  bookId?: string;
   title: string;
-  categoryId: SelectOpt;
-  subCategoryId: SelectOpt;
-  publisherId: SelectOpt;
+  category: SelectOpt;
+  subCategory: SelectOpt;
+  publisher: SelectOpt;
   price: string;
   point: string;
   publishedDate: string;
   description: string;
   imageUrl: string;
-  authorId: SelectOpt[];
+  author: SelectOpt[];
+};
+
+export type RespBookUpdateData = {
+  bookId?: string;
+  title: string;
+  category: string;
+  subCategory: string;
+  publisher: string;
+  price: string;
+  point: string;
+  publishedDate: string;
+  description: string;
+  imageUrl: string;
+  author: string[];
 };
 
 export type SelectOpt = {
