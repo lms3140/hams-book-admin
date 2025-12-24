@@ -1,55 +1,96 @@
 "use client";
 
-import { SERVER_URL } from "@/app/_lib/api/common/config";
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import dayjs from "dayjs";
+import { useParams, useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
+
+type TabType = "INFO" | "ORDER" | "REVIEW";
+type UserStatus = "ACTIVE" | "BLOCK" | "WITHDRAW";
 
 export default function UserDetailPage() {
-  const { memberId } = useParams();
+  const { member_id } = useParams(); // PK 기준
   const router = useRouter();
 
-  const [tab, setTab] = useState("INFO");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [status, setStatus] = useState("");
+  const [tab, setTab] = useState<TabType>("INFO");
+  const [status, setStatus] = useState<UserStatus>("ACTIVE");
 
-  useEffect(() => {
-    fetch(`${SERVER_URL}/admin/users/${memberId}`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
-        setStatus(data.status);
+  const fetchUser = async () => {
+    if (!member_id) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/admin/users/${member_id}`, {
+        credentials: "include",
       });
-  }, [memberId]);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setUser(data);
+      setStatus(data.status || "ACTIVE");
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "회원 정보를 불러올 수 없습니다." });
+    }
+  };
+
+  const fetchOrders = async () => {
+    if (!member_id) return;
+    try {
+      const res = await fetch(
+        `${SERVER_URL}/admin/users/${member_id}/orders`,
+        { credentials: "include" }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setOrders(data || []);
+    } catch (err) {
+      console.error(err);
+      setOrders([]);
+    }
+  };
+
+  const fetchReviews = async () => {
+    if (!member_id) return;
+    try {
+      const res = await fetch(
+        `${SERVER_URL}/admin/users/${member_id}/reviews`,
+        { credentials: "include" }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setReviews(data || []);
+    } catch (err) {
+      console.error(err);
+      setReviews([]);
+    }
+  };
 
   useEffect(() => {
-    if (tab === "ORDER") {
-      fetch(`${SERVER_URL}/admin/users/${memberId}/orders`, {
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then(setOrders);
-    }
+    fetchUser();
+  }, [member_id]);
 
-    if (tab === "REVIEW") {
-      fetch(`${SERVER_URL}/admin/users/${memberId}/reviews`, {
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then(setReviews);
-    }
-  }, [tab, memberId]);
+  useEffect(() => {
+    if (tab === "ORDER") fetchOrders();
+    if (tab === "REVIEW") fetchReviews();
+  }, [tab, member_id]);
 
   const changeStatus = async () => {
-    await fetch(`${SERVER_URL}/admin/users/${memberId}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ status }),
-    });
-    alert("상태 변경 완료");
+    if (!member_id) return;
+    try {
+      const res = await fetch(`${SERVER_URL}/admin/users/${member_id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      Swal.fire({ icon: "success", title: "회원 상태가 변경되었습니다." });
+      fetchUser();
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "상태 변경 실패" });
+    }
   };
 
   if (!user) return <div>로딩중...</div>;
@@ -67,37 +108,43 @@ export default function UserDetailPage() {
 
       {/* 회원 정보 */}
       {tab === "INFO" && (
-        <div>
-          <p>아이디: {user.userId}</p>
+        <div className="space-y-4">
+          <p>아이디: {user.user_id}</p>
           <p>이름: {user.name}</p>
           <p>이메일: {user.email}</p>
-          <p>가입일: {dayjs(user.createdAt).format("YYYY-MM-DD")}</p>
+          <p>상태: {user.status}</p>
+          <p>포인트: {user.point_balance ?? 0}</p>
+          <p>
+            가입일:{" "}
+            {user.created_at
+              ? new Date(user.created_at).toISOString().slice(0, 10)
+              : "-"}
+          </p>
 
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="border px-3 py-2 mt-4"
-          >
-            <option value="ACTIVE">정상</option>
-            <option value="BLOCK">차단</option>
-            <option value="WITHDRAW">탈퇴</option>
-          </select>
-
-          <button
-            onClick={changeStatus}
-            className="ml-2 bg-black text-white px-4 py-2"
-          >
-            변경
-          </button>
+          {/* 상태 변경 */}
+          <div className="mt-6 flex items-center gap-2">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as UserStatus)}
+              className="border px-3 py-2"
+            >
+              <option value="ACTIVE">정상</option>
+              <option value="BLOCK">차단</option>
+              <option value="WITHDRAW">탈퇴</option>
+            </select>
+            <button onClick={changeStatus} className="bg-black text-white px-4 py-2">
+              상태 변경
+            </button>
+          </div>
         </div>
       )}
 
       {/* 주문 내역 */}
       {tab === "ORDER" && (
-        <ul>
+        <ul className="border-t pt-2">
           {orders.map((o) => (
             <li key={o.orderId}>
-              주문번호 {o.orderId} / {o.orderStatus}
+              주문번호: {o.orderId} / 상태: {o.orderStatus}
             </li>
           ))}
         </ul>
@@ -105,7 +152,7 @@ export default function UserDetailPage() {
 
       {/* 리뷰 내역 */}
       {tab === "REVIEW" && (
-        <ul>
+        <ul className="border-t pt-2">
           {reviews.map((r) => (
             <li key={r.reviewId}>
               {r.productName} - {r.rating}점
