@@ -9,89 +9,61 @@ type TabType = "INFO" | "ORDER" | "REVIEW";
 type UserStatus = "ACTIVE" | "BLOCK" | "WITHDRAW";
 
 export default function UserDetailPage() {
-  const { member_id } = useParams(); // PK 기준
+  const params = useParams();
+  const memberId = params?.member_id as string;
   const router = useRouter();
 
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [tab, setTab] = useState<TabType>("INFO");
   const [status, setStatus] = useState<UserStatus>("ACTIVE");
 
+  // ===== 회원 정보 =====
   const fetchUser = async () => {
-    if (!member_id) return;
+    if (!memberId) return;
+
     try {
-      const res = await fetch(`${SERVER_URL}/admin/users/${member_id}`, {
+      const res = await fetch(`${SERVER_URL}/admin/users/${memberId}`, {
         credentials: "include",
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      if (!res.ok) throw new Error();
       const data = await res.json();
+
       setUser(data);
-      setStatus(data.status || "ACTIVE");
-    } catch (err) {
-      console.error(err);
-      Swal.fire({ icon: "error", title: "회원 정보를 불러올 수 없습니다." });
+      setStatus(data.status);
+    } catch {
+      Swal.fire("오류", "회원 정보를 불러올 수 없습니다.", "error");
     }
   };
 
+  // ===== 주문 =====
   const fetchOrders = async () => {
-    if (!member_id) return;
-    try {
-      const res = await fetch(
-        `${SERVER_URL}/admin/users/${member_id}/orders`,
-        { credentials: "include" }
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setOrders(data || []);
-    } catch (err) {
-      console.error(err);
-      setOrders([]);
-    }
+    const res = await fetch(
+      `${SERVER_URL}/admin/users/${memberId}/orders`,
+      { credentials: "include" }
+    );
+    setOrders(await res.json());
   };
 
+  // ===== 리뷰 =====
   const fetchReviews = async () => {
-    if (!member_id) return;
-    try {
-      const res = await fetch(
-        `${SERVER_URL}/admin/users/${member_id}/reviews`,
-        { credentials: "include" }
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setReviews(data || []);
-    } catch (err) {
-      console.error(err);
-      setReviews([]);
-    }
+    const res = await fetch(
+      `${SERVER_URL}/admin/users/${memberId}/reviews`,
+      { credentials: "include" }
+    );
+    setReviews(await res.json());
   };
 
   useEffect(() => {
     fetchUser();
-  }, [member_id]);
+  }, [memberId]);
 
   useEffect(() => {
     if (tab === "ORDER") fetchOrders();
     if (tab === "REVIEW") fetchReviews();
-  }, [tab, member_id]);
-
-  const changeStatus = async () => {
-    if (!member_id) return;
-    try {
-      const res = await fetch(`${SERVER_URL}/admin/users/${member_id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ status }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      Swal.fire({ icon: "success", title: "회원 상태가 변경되었습니다." });
-      fetchUser();
-    } catch (err) {
-      console.error(err);
-      Swal.fire({ icon: "error", title: "상태 변경 실패" });
-    }
-  };
+  }, [tab]);
 
   if (!user) return <div>로딩중...</div>;
 
@@ -106,59 +78,21 @@ export default function UserDetailPage() {
         <button onClick={() => setTab("REVIEW")}>리뷰 내역</button>
       </div>
 
-      {/* 회원 정보 */}
+      {/* INFO */}
       {tab === "INFO" && (
-        <div className="space-y-4">
-          <p>아이디: {user.user_id}</p>
+        <div className="space-y-2">
+          <p>아이디: {user.userId}</p>
           <p>이름: {user.name}</p>
           <p>이메일: {user.email}</p>
           <p>상태: {user.status}</p>
-          <p>포인트: {user.point_balance ?? 0}</p>
+          <p>포인트: {user.pointBalance}</p>
           <p>
             가입일:{" "}
-            {user.created_at
-              ? new Date(user.created_at).toISOString().slice(0, 10)
+            {user.createdAt
+              ? new Date(user.createdAt).toISOString().slice(0, 10)
               : "-"}
           </p>
-
-          {/* 상태 변경 */}
-          <div className="mt-6 flex items-center gap-2">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as UserStatus)}
-              className="border px-3 py-2"
-            >
-              <option value="ACTIVE">정상</option>
-              <option value="BLOCK">차단</option>
-              <option value="WITHDRAW">탈퇴</option>
-            </select>
-            <button onClick={changeStatus} className="bg-black text-white px-4 py-2">
-              상태 변경
-            </button>
-          </div>
         </div>
-      )}
-
-      {/* 주문 내역 */}
-      {tab === "ORDER" && (
-        <ul className="border-t pt-2">
-          {orders.map((o) => (
-            <li key={o.orderId}>
-              주문번호: {o.orderId} / 상태: {o.orderStatus}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* 리뷰 내역 */}
-      {tab === "REVIEW" && (
-        <ul className="border-t pt-2">
-          {reviews.map((r) => (
-            <li key={r.reviewId}>
-              {r.productName} - {r.rating}점
-            </li>
-          ))}
-        </ul>
       )}
 
       <button
