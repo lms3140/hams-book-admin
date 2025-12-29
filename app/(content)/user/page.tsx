@@ -6,6 +6,7 @@ import { SERVER_URL } from "@/app/_lib/api/common/config";
 import Pagination from "@/app/_components/Pagination/Pagination";
 import { UserFilter, UserFilterValue } from "./UserFilter";
 
+// 상태에 따른 배지 색상
 const statusBadge = (status: string) => {
   switch (status) {
     case "ACTIVE":
@@ -19,6 +20,7 @@ const statusBadge = (status: string) => {
   }
 };
 
+// 상태 텍스트 변환
 const statusText = (status: string) => {
   switch (status) {
     case "ACTIVE":
@@ -85,11 +87,18 @@ export default function UserPage() {
 
   return (
     <div className="p-[30px]">
-      <h1 className="text-4xl mb-6">회원 관리</h1>
+      {/* 제목 */}
+      <h1 className="text-4xl mb-2">회원 관리</h1>
 
+      {/* 총 회원 수 */}
+      <div className="mb-6 font-semibold">
+        총 회원수: <span className="text-[#3c9a17]">{filteredUsers.length}명</span>
+      </div>
+
+      {/* 필터 */}
       <UserFilter onSearch={handleSearch} onReset={handleReset} />
 
-      {/* 헤더 */}
+      {/* 회원 리스트 헤더 */}
       <div className="grid grid-cols-7 bg-gray-50 p-3 text-sm font-semibold">
         <div>No</div>
         <div>이름</div>
@@ -97,10 +106,10 @@ export default function UserPage() {
         <div>이메일</div>
         <div>상태</div>
         <div>가입일</div>
-        <div>상세</div>
+        <div>상세 보기</div>
       </div>
 
-      {/* 리스트 */}
+      {/* 회원 리스트 */}
       {currentItems.map((u, idx) => (
         <div
           key={u.memberId}
@@ -112,22 +121,30 @@ export default function UserPage() {
           <div>{u.userId}</div>
           <div>{u.email}</div>
 
-          {/* ✅ 상태 UX 유지 */}
+          {/* 상태 배지 */}
           <div>
-            <span
-              className={`px-2 py-1 rounded text-xs font-semibold ${statusBadge(
-                u.status
-              )}`}
-            >
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${statusBadge(u.status)}`}>
               {statusText(u.status)}
             </span>
           </div>
 
-          <div>{u.createdAt?.slice(0, 10)}</div>
-          <div className="underline">보기</div>
+          <div>{u.createdAt?.slice(0, 10) ?? "-"}</div>
+
+          <div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/user/${u.memberId}`);
+              }}
+              className="underline cursor-pointer"
+            >
+              상세 보기
+            </button>
+          </div>
         </div>
       ))}
 
+      {/* 페이지네이션 */}
       <Pagination
         currentPage={currentPage}
         pageCount={pageCount}

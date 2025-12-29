@@ -123,7 +123,7 @@ export default function UserDetailPage() {
         </button>
       </div>
 
-      {/* ================= INFO ================= */}
+      {/* 회원 정보 */}
       {tab === "INFO" && (
         <div className="max-w-md border p-6 rounded space-y-4">
           {/* 상태 수정 */}
@@ -242,8 +242,7 @@ export default function UserDetailPage() {
         </div>
       )}
 
-
-      {/* ================= ORDER ================= */}
+      {/* 주문 내역 */}
       {tab === "ORDER" && (
         <>
           {loading && <p>로딩중...</p>}
@@ -312,7 +311,7 @@ export default function UserDetailPage() {
         </>
       )}
 
-      {/* ================= REVIEW ================= */}
+      {/* 리뷰 내역 */}
       {tab === "REVIEW" && (
         <>
           {loading && <p>로딩중...</p>}
