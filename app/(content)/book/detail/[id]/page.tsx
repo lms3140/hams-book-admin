@@ -9,7 +9,7 @@ export default async function Page({
 }) {
   const id = (await params).id;
   const bookInfo = await getServerFetch(
-    `${SERVER_URL}/book/admin/detail/${id}`
+    `${SERVER_URL}/admin/book/detail/${id}`
   );
   return (
     <div>

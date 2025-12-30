@@ -45,7 +45,7 @@ export function BookForm({ formType, updateData }: BookFormProps) {
   const [publisher, setPublisher] = useState<SelectOpt[]>([]);
   const [author, setAuthor] = useState<SelectOpt[]>([]);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [_, setIsLoading] = useState(false); // 다른 대안이 있나 보는중
   const watchCategory = watch("category");
 
   // init form
@@ -117,7 +117,10 @@ export function BookForm({ formType, updateData }: BookFormProps) {
   const saveBook = async (data: RequestBookInfo) => {
     console.log(data);
     try {
-      const { resp } = await postClientFetch(`${SERVER_URL}/book/save`, data);
+      const { resp } = await postClientFetch(
+        `${SERVER_URL}/admin/book/save`,
+        data
+      );
       console.log(resp.status);
       if (resp.status === 201) {
         Swal.fire({ title: "등록성공", icon: "success", timer: 1000 });
