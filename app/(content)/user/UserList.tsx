@@ -22,45 +22,41 @@ export function UserList({ currentItems, offset }: any) {
 
   return (
     <div className="border-t">
-      {/* 헤더 */}
-      <div className="grid grid-cols-7 bg-gray-50 p-3 text-sm">
+      <div className="grid grid-cols-7 bg-gray-50 p-3 text-sm font-semibold">
         <div>No</div>
         <div>이름</div>
         <div>아이디</div>
         <div>이메일</div>
         <div>상태</div>
         <div>가입일</div>
-        <div>상세</div>
+        <div>상세 보기</div>
       </div>
 
-      {/* 리스트 */}
       {currentItems.map((u: any, idx: number) => (
         <div
-          key={u.memberId}
-          className="grid grid-cols-7 p-3 border-t text-sm hover:bg-gray-50"
-          onClick={() => router.push(`/user/${u.memberId}`)}
+          key={u.member_id}
+          className="grid grid-cols-7 p-3 border-t text-sm hover:bg-gray-50 cursor-pointer"
+          onClick={() => router.push(`/user/${u.member_id}`)}
         >
           <div>{offset + idx + 1}</div>
           <div>{u.name}</div>
           <div>{u.userId}</div>
           <div>{u.email}</div>
           <div>
-            <span
-              className={`px-2 py-1 rounded text-xs ${statusBadge(u.status)}`}
-            >
+            <span className={`px-2 py-1 rounded text-xs ${statusBadge(u.status)}`}>
               {statusText(u.status)}
             </span>
           </div>
-          <div>{dayjs(u.createdAt).format("YYYY-MM-DD")}</div>
+          <div>{u.created_at ? dayjs(u.created_at).format("YYYY-MM-DD") : "-"}</div>
           <div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/user/${u.memberId}`);
+                router.push(`/user/${u.member_id}`);
               }}
               className="underline cursor-pointer"
             >
-              상세
+              상세 보기
             </button>
           </div>
         </div>

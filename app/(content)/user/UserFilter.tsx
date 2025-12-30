@@ -44,10 +44,7 @@ export function UserFilter({
         검색
       </button>
 
-      <button
-        onClick={onReset}
-        className="border px-6 py-2"
-      >
+      <button onClick={onReset} className="border px-6 py-2">
         초기화
       </button>
     </div>
