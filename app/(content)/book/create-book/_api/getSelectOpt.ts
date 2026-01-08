@@ -6,9 +6,10 @@ import {
   RespSubCategory,
 } from "../_types/category";
 import { SelectOpt } from "@/app/_types/book";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 
 export const getCategory = async () => {
-  const data = (await getClientFetch("http://localhost:8080/category/list"))
+  const data = (await getClientFetch(`${SERVER_URL}/category/list`))
     .data as RespCategory[];
   const selectOpts = data?.map((v: RespCategory) => ({
     label: v.categoryName,
@@ -18,7 +19,7 @@ export const getCategory = async () => {
 };
 
 export const getPublisher = async () => {
-  const data = (await getClientFetch("http://localhost:8080/publisher/list"))
+  const data = (await getClientFetch(`${SERVER_URL}/publisher/list`))
     .data as RespPublisher[];
   const selectOpts = data?.map((v: RespPublisher) => ({
     label: v.name,
@@ -28,7 +29,7 @@ export const getPublisher = async () => {
 };
 
 export const getAuthor = async () => {
-  const data = (await getClientFetch("http://localhost:8080/author/list"))
+  const data = (await getClientFetch(`${SERVER_URL}/author/list`))
     .data as RespAuthor[];
   const selectOpts = data?.map((v: RespAuthor) => ({
     label: v.name,
@@ -41,7 +42,7 @@ export const getSubCategory = async (categoryId: SelectOpt) => {
   if (!categoryId || categoryId.value === undefined) return [];
   const data = (
     await getClientFetch(
-      `http://localhost:8080/category/sub-list?categoryId=${categoryId.value}`
+      `${SERVER_URL}/category/sub-list?categoryId=${categoryId.value}`
     )
   ).data as RespSubCategory[];
 
