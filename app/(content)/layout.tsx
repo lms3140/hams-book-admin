@@ -8,8 +8,5 @@ export default async function layout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  // console.log("[dev] cookie : " + cookieStore.get("accessToken"));
-
   return <DefaultLayout>{children}</DefaultLayout>;
 }

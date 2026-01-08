@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 
 type LoginFormData = {
   userId: string;
@@ -13,7 +14,7 @@ export default function LoginForm() {
   const { register, handleSubmit } = useForm<LoginFormData>();
 
   const handleLogin = async (formData: LoginFormData) => {
-    const resp = await fetch("http://localhost:8080/member/login-cookie", {
+    const resp = await fetch(`${SERVER_URL}/member/login-cookie`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  SelectOpt,
   RequestBookInfo,
   RespBookUpdateData,
+  SelectOpt,
 } from "@/app/_types/book";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import {
   getAuthor,
   getCategory,
@@ -16,14 +16,12 @@ import {
   getSubCategory,
 } from "../create-book/_api/getSelectOpt";
 import { BookInput } from "../create-book/_components/BookInput";
-import { CheckBox } from "../create-book/_components/CheckBox";
-import Select from "react-select/base";
-// import BookSelect from "../create-book/_components/BookSelect";
+
+import { postClientFetch } from "@/app/_lib/api/client/fetch";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { postClientFetch } from "@/app/_lib/api/client/fetch";
 import Swal from "sweetalert2";
-import { SERVER_URL } from "@/app/_lib/api/common/config";
 const BookSelect = dynamic(
   () => import("../create-book/_components/BookSelect"),
   {
