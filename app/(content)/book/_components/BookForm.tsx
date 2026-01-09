@@ -17,7 +17,7 @@ import {
 } from "../create-book/_api/getSelectOpt";
 import { BookInput } from "../create-book/_components/BookInput";
 
-import { postClientFetch } from "@/app/_lib/api/client/fetch";
+import { getClientFetch, postClientFetch } from "@/app/_lib/api/client/fetch";
 import { SERVER_URL } from "@/app/_lib/api/common/config";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -30,11 +30,11 @@ const BookSelect = dynamic(
 );
 // BookForm 재사용성 높이기 위한 작업
 type BookFormProps = {
-  updateData?: RespBookUpdateData;
   formType: "create" | "update";
+  bookId: string | undefined;
 };
 
-export function BookForm({ formType, updateData }: BookFormProps) {
+export function BookForm({ formType, bookId }: BookFormProps) {
   const { register, handleSubmit, control, watch, reset } =
     useForm<RequestBookInfo>({});
 
@@ -66,12 +66,15 @@ export function BookForm({ formType, updateData }: BookFormProps) {
         setAuthor(authors);
         setSubCategory(subCategories);
 
-        if (!updateData) {
+        if (!bookId) {
           const category = categories[0];
           const subCategory = subCategories[0];
           const publisher = publishers[0];
           reset({ category, publisher, subCategory });
         } else {
+          const updateData = (
+            await getClientFetch(`${SERVER_URL}/admin/book/detail/${bookId}`)
+          ).data as RespBookUpdateData;
           const category = categories.find(
             (v) => v.value === updateData.category
           );
@@ -84,7 +87,6 @@ export function BookForm({ formType, updateData }: BookFormProps) {
           const publisher = publishers.find(
             (v) => v.value === updateData.publisher
           );
-          const bookId = updateData.bookId;
 
           reset({
             ...updateData,

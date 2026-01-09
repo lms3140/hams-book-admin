@@ -11,7 +11,6 @@ export default async function layout({
   return (
     <DefaultLayout>
       <>{children}</>
-      <AuthComponent />
     </DefaultLayout>
   );
 }
