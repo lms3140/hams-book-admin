@@ -31,7 +31,7 @@ const BookSelect = dynamic(
 // BookForm 재사용성 높이기 위한 작업
 type BookFormProps = {
   formType: "create" | "update";
-  bookId: string | undefined;
+  bookId?: string;
 };
 
 export function BookForm({ formType, bookId }: BookFormProps) {
