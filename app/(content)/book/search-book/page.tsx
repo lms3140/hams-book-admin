@@ -10,13 +10,11 @@ export default async function Page({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
-  const data = (await getServerFetch(
-    `${SERVER_URL}/api/search?keyword=${params.keyword}`
-  )) as Book[];
+  const keyword = params.keyword;
   return (
     <>
       <SearchForm />
-      <ItemContainer books={data} />
+      <ItemContainer keyword={keyword} />
     </>
   );
 }
