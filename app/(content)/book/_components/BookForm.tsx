@@ -115,15 +115,17 @@ export function BookForm({ formType, bookId }: BookFormProps) {
 
   const router = useRouter();
   const saveBook = async (data: RequestBookInfo) => {
-    console.log(data);
     try {
       const { resp } = await postClientFetch(
         `${SERVER_URL}/admin/book/save`,
         data
       );
-      console.log(resp.status);
+
       if (resp.status === 201) {
         Swal.fire({ title: "등록성공", icon: "success", timer: 1000 });
+        router.replace("/book");
+      } else if (resp.status === 200) {
+        Swal.fire({ title: "수정성공", icon: "success", timer: 1000 });
         router.replace("/book");
       }
     } catch (e) {
@@ -254,7 +256,7 @@ export function BookForm({ formType, bookId }: BookFormProps) {
         </div>
 
         <button
-          className="bg-blue-500 rounded-2xl p-4 text-slate-100 font-bold text-xl"
+          className="bg-blue-500 rounded-2xl p-4 cursor-pointer text-slate-100 font-bold text-xl"
           type="submit"
         >
           {formType === "create" ? "등록" : "수정"}
