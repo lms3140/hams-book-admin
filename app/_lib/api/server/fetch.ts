@@ -5,6 +5,7 @@ export const getServerFetch = async (url: string, token?: string) => {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
+    credentials: "include",
     cache: "force-cache",
     next: { revalidate: 60 },
   });
@@ -27,6 +28,7 @@ export const postServerFetch = async <T>(
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
+    credentials: "include",
     body: JSON.stringify(body),
     cache: "no-store",
   });
