@@ -21,7 +21,6 @@ export default function OrderDetail() {
         method: "GET",
         credentials: "include",
       });
-
       const data = await res.json();
       setOrder(data);
       setStatus(data.orderStatus);

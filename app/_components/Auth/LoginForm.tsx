@@ -23,7 +23,6 @@ export default function LoginForm() {
       credentials: "include",
     });
     const data = await resp.json();
-    console.log(data);
     if (data.login) {
       Swal.fire({
         title: "로그인 성공",
