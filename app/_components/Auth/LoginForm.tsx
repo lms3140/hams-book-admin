@@ -30,6 +30,7 @@ export default function LoginForm() {
         showConfirmButton: false,
         timer: 1500,
       });
+
       redirect("/book");
     } else {
       Swal.fire({

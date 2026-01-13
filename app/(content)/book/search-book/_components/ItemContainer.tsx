@@ -1,5 +1,7 @@
 "use client";
 
+import { getClientFetch } from "@/app/_lib/api/client/fetch";
+import { SERVER_URL } from "@/app/_lib/api/common/config";
 import { Book } from "@/app/_types/book";
 import {
   createColumnHelper,
@@ -9,16 +11,25 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ItemContainerProps = {
-  books: Book[];
+  keyword: string | string[] | undefined;
 };
 
 const columnHelper = createColumnHelper<Book>();
 
-export default function ItemContainer({ books }: ItemContainerProps) {
+export default function ItemContainer({ keyword }: ItemContainerProps) {
   const router = useRouter();
+  const [bookList, setBookList] = useState<Book[]>([]);
+  useEffect(() => {
+    (async () => {
+      const data = (
+        await getClientFetch(`${SERVER_URL}/api/search?keyword=${keyword}`)
+      ).data as Book[];
+      setBookList(data);
+    })();
+  }, []);
 
   const columns = useMemo(() => {
     return [
@@ -68,14 +79,14 @@ export default function ItemContainer({ books }: ItemContainerProps) {
         ),
       }),
     ];
-  }, []);
+  }, [bookList]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
   const table = useReactTable({
-    data: books,
+    data: bookList,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
